@@ -68,6 +68,7 @@ import WorkspaceImport from "../components/WorkspaceImport.vue";
 import ScriptEditor from "./ScriptEditor.vue";
 import ProbabilityChart from "./ProbabilityChart.vue";
 import { quantumLanguages } from "./languages.js";
+import { copyText } from "./clipboard.js";
 import { algebraModes, algebraSelectionKey, buildRequest, defaultAlgebra, draftKeyFor, initialAlgebra, initialForm, validateResults } from "./model.js";
 const algebras = Object.entries(algebraModes).map(([value, mode]) => ({ value, label: mode.label }));
 let preferredAlgebra = defaultAlgebra;
@@ -94,6 +95,7 @@ for (const key of Object.keys(algebraModes)) {
   } catch { /* Keep the default draft when local storage is unavailable. */ }
 }
 const running = ref(false), status = ref("idle"), result = ref(null), expanded = ref(false), copied = ref(false);
+const copying = ref(false);
 const message = ref("Set parameters in Variable Assignments and mark a state with :psi; in the visualization script, then Run.");
 const validName = computed(() => isValidFunctionName(form.value.functionName));
 const fingerprint = () => JSON.stringify({ algebra: algebra.value, ...form.value });
@@ -193,8 +195,16 @@ async function run() {
   } finally { clearTimeout(timer); running.value = false; }
 }
 async function copyCode() {
-  try { await navigator.clipboard.writeText(result.value.code); copied.value = true; }
-  catch { message.value = "Clipboard unavailable. Select and copy text from Generated Code."; }
+  const output = result.value;
+  if (!output?.code || copying.value) return;
+  copied.value = false;
+  copying.value = true;
+  try {
+    const success = await copyText(output.code);
+    if (result.value !== output) return;
+    copied.value = success;
+    if (!success) message.value = "The browser blocked copying generated code.";
+  } finally { copying.value = false; }
 }
 async function saveCode(saveAs = false, downloadOnly = false) {
   if (!result.value?.code || codeSaving.value || fileLoading.value) return;

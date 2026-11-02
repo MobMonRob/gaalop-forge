@@ -1,7 +1,8 @@
 <template>
   <section class="q-state">
     <h4>{{ name }} · Quantum state probability distribution (n={{ state.nqubits }})</h4>
-    <p v-if="invalidState" class="q-warning">This output is not a normalized state in the selected algebra’s ket subspace. Values are shown without normalization.</p>
+    <p v-if="notNormalized" class="q-warning">Total probability differs from 1 by {{ normalizationDeviation.toExponential(3) }} (tolerance {{ probabilityTolerance.toExponential(0) }}). Values are shown without normalization.</p>
+    <p v-if="outsideKetSubspace" class="q-warning">This output contains components outside the selected algebra’s ket subspace (residual norm {{ state.residualNorm.toExponential(3) }}; tolerance {{ residualTolerance.toExponential(0) }}).</p>
     <div class="q-plot-scroll" tabindex="0" :aria-label="`${name} probability chart, scroll horizontally for all basis states`">
       <svg :viewBox="`0 0 ${width} 290`" :style="{ width: `${width}px`, minWidth: '100%' }" role="img" :aria-label="`${name} basis-state probabilities`">
         <text x="12" y="16" fill="#687993" font-size="11">Probability |α|²</text>
@@ -13,15 +14,15 @@
           <rect :x="48 + index * step + 5" :y="230 - p / maximum * 200" :width="step - 10" :height="p / maximum * 200" :fill="p > 0 && p >= peak * 0.95 ? '#ef4444' : '#80c7fa'">
             <title>{{ state.labels[index] }}: P={{ p }}; Re(α)={{ state.real[index] }}; Im(α)={{ state.imaginary[index] }}</title>
           </rect>
-          <text v-if="state.probabilities.length <= 16" :x="48 + (index + 0.5) * step" :y="224 - p / maximum * 200" text-anchor="middle" font-size="10">{{ p.toFixed(4) }}</text>
+          <text v-if="state.probabilities.length <= 16" :x="48 + (index + 0.5) * step" :y="224 - p / maximum * 200" text-anchor="middle" font-size="10">{{ p.toPrecision(8) }}</text>
           <text :transform="`translate(${48 + (index + 0.5) * step},244) rotate(40)`" font-size="10" fill="#354663">{{ state.labels[index] }}</text>
         </g>
       </svg>
     </div>
-    <div class="q-statistics"><span>Total probability = {{ state.totalProbability.toPrecision(7) }}</span><span>Residual norm = {{ state.residualNorm.toExponential(3) }}</span></div>
+    <div class="q-statistics"><span>Total probability = {{ state.totalProbability.toPrecision(8) }}</span><span>Deviation from 1 = {{ normalizationDeviation.toExponential(3) }}</span><span>Residual norm = {{ state.residualNorm.toExponential(3) }}</span></div>
     <details><summary>Amplitudes and probabilities · {{ state.labels.length }} basis states</summary>
       <div class="q-table-scroll"><table><thead><tr><th>Basis state</th><th>Re(α)</th><th>Im(α)</th><th>|α|²</th></tr></thead><tbody>
-        <tr v-for="(label, index) in state.labels" :key="label"><th>{{ label }}</th><td>{{ state.real[index].toPrecision(7) }}</td><td>{{ state.imaginary[index].toPrecision(7) }}</td><td>{{ state.probabilities[index].toPrecision(7) }}</td></tr>
+        <tr v-for="(label, index) in state.labels" :key="label"><th>{{ label }}</th><td>{{ state.real[index].toPrecision(8) }}</td><td>{{ state.imaginary[index].toPrecision(8) }}</td><td>{{ state.probabilities[index].toPrecision(8) }}</td></tr>
       </tbody></table></div>
     </details>
   </section>
@@ -29,11 +30,14 @@
 <script setup>
 import { computed } from "vue";
 const props = defineProps({ name: String, state: { type: Object, required: true } });
-const width = computed(() => Math.max(580, 60 + props.state.labels.length * 34));
+const probabilityTolerance = 1e-4, residualTolerance = 1e-8;
+const width = computed(() => Math.max(580, 60 + props.state.labels.length * (props.state.labels.length <= 16 ? 90 : 34)));
 const step = computed(() => (width.value - 60) / props.state.labels.length);
 const peak = computed(() => Math.max(...props.state.probabilities));
 const maximum = computed(() => Math.max(1, peak.value * 1.08));
-const invalidState = computed(() => Math.abs(props.state.totalProbability - 1) > 1e-6 || props.state.residualNorm > 1e-8);
+const normalizationDeviation = computed(() => Math.abs(props.state.totalProbability - 1));
+const notNormalized = computed(() => normalizationDeviation.value > probabilityTolerance);
+const outsideKetSubspace = computed(() => props.state.residualNorm > residualTolerance);
 </script>
 <style scoped>
 .q-state { padding: 14px; border-bottom: 1px solid #e4ebf5; }

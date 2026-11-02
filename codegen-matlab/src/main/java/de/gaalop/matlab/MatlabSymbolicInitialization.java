@@ -70,7 +70,9 @@ final class MatlabSymbolicInitialization {
         // A handle avoids shadowing isa by a user input; reserve its name too.
         String isSymbolic = "gaalopIsSym";
         for (int suffix = 1; usedNames.contains(isSymbolic); suffix++) isSymbolic = "gaalopIsSym_" + suffix;
-        line(code, indentation, "% Preserve symbolic coefficients; keep numeric assignment types unchanged.");
+        line(code, indentation, "% Preserve symbolic coefficients when a dependent input has MATLAB class 'sym'.");
+        line(code, indentation, "% isa(x, 'sym') checks the type; x([]) creates an empty array of that symbolic class.");
+        line(code, indentation, "% With numeric inputs, these initializers are skipped.");
         line(code, indentation, isSymbolic + " = @isa;");
         for (Map.Entry<String, Set<String>> array : arrays.entrySet()) {
             boolean first = true;

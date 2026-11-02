@@ -69,3 +69,29 @@ report = run_symbolic_regression('C:/path/to/before', 'C:/path/to/after', 'C:/pa
 ## 边界
 
 修复针对现有标量参数与多向量系数数组，不新增参数向量化或 symmatrix/symfun 支持，不改变数学表达式与系数顺序。符号调用需要 Symbolic Math Toolbox；纯数值生成函数没有新增 Symbolic Math Toolbox 构造函数调用。几何虚数与 MATLAB 复数的映射、Jaroslav 量子博弈整体验证、QRA 自由参数符号编译仍是另外的任务。
+
+## 生成代码中的简短说明（2026-11-02）
+
+多向量使用从 1 开始索引的系数数组，每条分量赋值后的注释标明对应基底。
+生成器保留 GAALOPScript 的变量名，包括 i 和 j，不自动绑定 MATLAB 虚数。
+
+开头的条件初始化用于兼容 MATLAB 的 sym 输入：
+
+```matlab
+gaalopIsSym = @isa;
+if gaalopIsSym(b0, 'sym')
+    psi = b0([]);
+end
+```
+
+@isa 创建类型检测函数句柄；isa(b0, 'sym') 判断输入是否为符号对象。
+b0([]) 创建同类空数组，避免后续符号表达式写入已有数值数组时发生类型错误。
+数值输入跳过对应初始化，不依赖符号输入的数组不被强制转成 sym。
+
+在提供的单比特 QCA 示例中，i(6)=1 的含义是 ei1 ^ ei2 的系数为 1，
+不是 MATLAB 复数标量；第六项也不是跨代数通用的虚数标记。
+i_square(1)=-1 是编译器计算几何乘法后的标量结果。
+MATLAB 原生复数可以使用 1i 或 1j；改名、修改基底注释都不会转换多向量表示。
+
+参考：[isa](https://www.mathworks.com/help/matlab/ref/isa.html)、
+[虚数单位](https://www.mathworks.com/help/matlab/ref/i.html)。

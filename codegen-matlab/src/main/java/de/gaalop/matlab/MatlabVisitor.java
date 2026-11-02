@@ -37,6 +37,10 @@ public class MatlabVisitor extends DefaultCodeGeneratorVisitor {
 
         code.append(")\n");
         indentation++;
+        appendIndentation();
+        code.append("% Multivectors use 1-based coefficient arrays; comments identify basis blades.\n");
+        appendIndentation();
+        code.append("% A multivector named i or j is not MATLAB's scalar imaginary unit (1i or 1j).\n");
         MatlabSymbolicInitialization.append(graph, code, indentation);
 
         node.getSuccessor().accept(this);

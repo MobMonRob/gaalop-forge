@@ -15,14 +15,14 @@ GAALOP Forge 将 [GAALOP 编译器](https://github.com/CallForSanity/Gaalop) 接
 
 ## 用 Docker 启动
 
-**1.2.1** 修复跨语言恒零输出遗漏和调用方输出数组旧值残留，包含两个独立工作台、MATLAB 符号数组、Python 数值数学及 QCA 五 qubit 支持。
+**1.2.2** 修复 HTTP 页面的一键复制，改善概率精度与归一化提示，并补充 MATLAB 符号初始化说明；保留两个独立工作台、MATLAB 符号数组、Python 数值数学、QCA 五 qubit 支持和 1.2.1 的恒零输出修复。
 
 ```bash
-docker pull gagislab/gaalop-forge:1.2.1
+docker pull gagislab/gaalop-forge:1.2.2
 docker run -d --name gaalop-forge -p 18080:8080 \
   -e GAALOP_SWAGGER_USERNAME=admin \
   -e GAALOP_SWAGGER_PASSWORD=change-me \
-  gagislab/gaalop-forge:1.2.1
+  gagislab/gaalop-forge:1.2.2
 ```
 
 | 服务 | 地址 |
@@ -148,7 +148,7 @@ systemd 健康检查访问 `/gaalop/api/v1/health`，经过启动等待后进行
 | `testbenchTbaGapp/` | 编译回归测试 |
 | `docker/`、`deploy/` | 镜像组装与服务器部署 |
 
-更多说明：[GAALOPScript 规则](GAALOPScript_Rules.md)、[语言参考](docs/gaalopscript-analysis/02-完整语言参考.md)、[MATLAB 兼容性](docs/matlab-symbolic-codegen.md)、[Python 兼容性](docs/python-codegen-compatibility.md)、[Open/Save](docs/browser-open-save.md)、[1.2.1 更新](docs/releases/1.2.1.md)。
+更多说明：[GAALOPScript 规则](GAALOPScript_Rules.md)、[语言参考](docs/gaalopscript-analysis/02-完整语言参考.md)、[MATLAB 兼容性](docs/matlab-symbolic-codegen.md)、[Python 兼容性](docs/python-codegen-compatibility.md)、[Open/Save](docs/browser-open-save.md)、[1.2.2 更新](docs/releases/1.2.2.md)。
 
 ## 致谢与许可
 
