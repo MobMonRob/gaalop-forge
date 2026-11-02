@@ -20,6 +20,7 @@ Version **1.2.2** fixes one-click code copying on HTTP pages, clarifies probabil
 ```bash
 docker pull gagislab/gaalop-forge:1.2.2
 docker run -d --name gaalop-forge -p 18080:8080 \
+  -e JAVA_TOOL_OPTIONS=-Xmx768m \
   -e GAALOP_SWAGGER_USERNAME=admin \
   -e GAALOP_SWAGGER_PASSWORD=change-me \
   gagislab/gaalop-forge:1.2.2
